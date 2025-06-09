@@ -11,6 +11,8 @@ const createRequest = async (req, res) => {
       pickupDate: req.body.pickupDate,
       timeSlot: req.body.timeSlot,
       notes: req.body.notes,
+      latitude: req.body.latitude,
+  longitude: req.body.longitude,
       image: req.file?.filename || null,
     });
 
@@ -93,6 +95,7 @@ const cancelRequest = async (req, res) => {
   }
 };
 // controllers/requestController.js
+
 
 
 

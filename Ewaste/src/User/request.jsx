@@ -22,7 +22,17 @@ export default function Request() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+
     const data = new FormData();
     data.append('ewasteType', formData.ewasteType);
     data.append('quantity', formData.quantity);
@@ -30,23 +40,28 @@ export default function Request() {
     data.append('timeSlot', formData.timeSlot);
     data.append('notes', formData.notes);
     if (formData.image) data.append('image', formData.image);
+    
+    // Add location
+    data.append('latitude', latitude);
+    data.append('longitude', longitude);
 
     try {
-      axios.post('http://localhost:9000/api/req/request', data, {
+      await axios.post('http://localhost:9000/api/req/request', data, {
         headers: {
           'Authorization': localStorage.getItem("token")
         }
-
       });
-      console.log('sending token:', localStorage.getItem('token'));
       alert('E-waste request submitted successfully!');
       setFormData({ ewasteType: '', quantity: 1, pickupDate: '', timeSlot: '', notes: '', image: null });
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || 'Submission failed';
-      console.error('Submission failed:', errorMsg);
       alert(errorMsg);
     }
-  };
+  }, (err) => {
+    alert("Failed to get location: " + err.message);
+  });
+};
+
 
   return (
     <div className="container py-5">
