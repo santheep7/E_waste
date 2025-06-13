@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { TextField, Button, Paper, Typography, Box } from '@mui/material';
 import { gsap } from 'gsap';
+import './Agentlogin.css';
+import AgentNavbar from './agentnav';
+
 
 export default function AgentLogin() {
   const [email, setEmail] = useState('');
@@ -20,11 +23,27 @@ export default function AgentLogin() {
     );
   }, []);
 
+  const validateEmail = (email) => {
+    // Simple regex for email validation
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+
     if (!email || !password) {
       setErrorMsg('Email and password are required.');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMsg('Please enter a valid email address.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMsg('Password must be at least 6 characters.');
       return;
     }
 
@@ -37,13 +56,10 @@ export default function AgentLogin() {
       );
 
       if (data.status === 200) {
-        // store token
         localStorage.setItem('agentToken', data.token);
-        localStorage.setItem("agentId",data.agentId)
-        localStorage.setItem('agentname',data.agentname);
+        localStorage.setItem("agentId", data.agentId);
+        localStorage.setItem('agentname', data.agentname);
         localStorage.setItem('isApproved', data.isApproved.toString());
-
-        // redirect to admin/agent home
         navigate('/agenthome');
       } else {
         setErrorMsg(data.message || 'Login failed.');
@@ -57,70 +73,84 @@ export default function AgentLogin() {
   };
 
   return (
-    <Box
-      sx={{
-        height: '100vh',
-        bgcolor: '#f0f2f5',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        p: 2,
-      }}
-    >
-      <Paper
-        elevation={4}
-        sx={{ p: 4, maxWidth: 400, width: '100%' }}
-        ref={cardRef}
+    <>
+      <AgentNavbar />
+      <Box
+        sx={{
+          height: '100vh',
+          backgroundImage: 'url(/assets/bg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          p: 2,
+        }}
       >
-        <Typography variant="h5" component="h1" gutterBottom align="center">
-          Agent Login
-        </Typography>
+        <Paper
+          elevation={4}
+          sx={{ p: 4, maxWidth: 400, width: '100%', backdropFilter: 'blur(5px)' }}
+          ref={cardRef}
+        >
+          <Typography variant="h5" component="h1" gutterBottom align="center">
+            Agent Login
+          </Typography>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <form onSubmit={handleSubmit} noValidate>
+            <TextField
+              label="Email"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-          <TextField
-            label="Password"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+            <TextField
+              label="Password"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-          {errorMsg && (
-            <Typography
-              color="error"
-              variant="body2"
-              sx={{ mt: 1, mb: 1, textAlign: 'center' }}
+            {errorMsg && (
+              <Typography
+                color="error"
+                variant="body2"
+                sx={{ mt: 1, mb: 1, textAlign: 'center' }}
+              >
+                {errorMsg}
+              </Typography>
+            )}
+
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              type="submit"
+              disabled={loading}
+              sx={{ mt: 2 }}
             >
-              {errorMsg}
-            </Typography>
-          )}
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
+          </form>
 
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            type="submit"
-            disabled={loading}
-            sx={{ mt: 2 }}
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </Button>
-        </form>
-      </Paper>
-    </Box>
+          {/* Registration Link */}
+          <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+            Don't have an account?{' '}
+            <Link to="/agentreg" style={{ color: '#1976d2', textDecoration: 'none' }}>
+              Register here
+            </Link>
+          </Typography>
+        </Paper>
+      </Box>
+    </>
   );
 }

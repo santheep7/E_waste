@@ -12,6 +12,7 @@ import {
   Alert,
   Container
 } from '@mui/material';
+import Navbar from './usernavbar';
 
 export default function MyRequests() {
   const [requests, setRequests] = useState([]);
@@ -74,8 +75,10 @@ export default function MyRequests() {
   }
 
   return (
+    <>
+    <Navbar/>
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" style={{marginTop:"75px"}} gutterBottom>
         My Pickup Requests
       </Typography>
 
@@ -163,5 +166,6 @@ export default function MyRequests() {
         </Grid>
       )}
     </Container>
+    </>
   );
 }

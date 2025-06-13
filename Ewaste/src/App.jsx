@@ -17,7 +17,8 @@ const ViewAgentsAdmin =lazy(()=> import('./Admin/viewAgent'));
 const ViewProfile = lazy(() => import('./Agent/profile'));
 const AdminLogin = lazy(() => import('./Admin/adminlogin'));
 const AdminHome = lazy(() => import('./Admin/adminhome'));
-const PickupMap = lazy(()=>import('./Agent/pickupmap'))
+const AgentMapView = lazy(() => import('./Agent/AgentMapView'));
+const UserHome = lazy(() => import('./User/home'));
 const GetUser = lazy(() => import('./Admin/viewuser'));
 const ViewRequests = lazy(() => import('./Admin/viewrequest'));
 const AgentHome =lazy(()=>import('./Agent/agenthome'));
@@ -27,7 +28,7 @@ export default function App() {
     <Router>
       <Suspense fallback={<div style={{ textAlign: 'center', marginTop: '2rem' }}>Loading...</div>}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/homepage" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/adminlogin" element={<AdminLogin />} />
           <Route path="/Userregister" element={<Register />} />
@@ -42,7 +43,10 @@ export default function App() {
           <Route path="/viewAgent" element={<ViewAgentsAdmin/>} />
           <Route path="/viewuserRequest" element={<ViewApprovedRequests/>} />
           <Route path="/profile" element={<ViewProfile/>} />
-          <Route path="/pickup" element={<PickupMap />} />
+          <Route path="/AgentMapView" element={<AgentMapView />} />
+          <Route path="/" element={<UserHome />} />
+
+          
         </Routes>
       </Suspense>
     </Router>

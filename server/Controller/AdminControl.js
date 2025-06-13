@@ -66,8 +66,22 @@ const approveAgent = async (req, res) => {
 }
 
 
+//get card stats
+const getAdminStats = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const pickupRequests = await Request.countDocuments();
+    const completedPickups = await Request.countDocuments({ isPickedUp: true });
 
+    res.status(200).json({
+      totalUsers,
+      pickupRequests,
+      completedPickups,
+    });
+  } catch (err) {
+    console.error("Error fetching admin stats:", err);
+    res.status(500).json({ message: "Failed to fetch statistics" });
+  }
+}
 
-// Get all pickup requests
-
-module.exports = {getuser,deluser,getAgent,delagent,approveAgent}
+module.exports = {getuser,deluser,getAgent,delagent,approveAgent,getAdminStats}

@@ -102,7 +102,7 @@ await axios.post("http://localhost:9000/api/user/request-otp-login", { email: re
         localStorage.setItem("name", res.data.name);
         localStorage.setItem("id", res.data.id);
         toast.success("Login successful!");
-        setTimeout(() => navigate("/"), 1500);
+        setTimeout(() => navigate("/homepage"), 1500);
       } else {
         toast.error("Invalid OTP.");
       }

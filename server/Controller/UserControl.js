@@ -1,5 +1,7 @@
+require('dotenv').config();
 const User = require('../model/Usermodel');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 // Temporary in-memory OTP store
 let otpStore = {};
@@ -8,6 +10,15 @@ let otpStore = {};
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+// Nodemailer transporter (Gmail)
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 // === Registration OTP ===
 const requestOtp = async (req, res) => {
@@ -27,15 +38,27 @@ const requestOtp = async (req, res) => {
       expiresAt
     };
 
-    console.log(`OTP for registration (${email}): ${otp}`);
+    // Log only in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`OTP for registration (${email}): ${otp}`);
+    }
 
-    return res.status(200).json({ msg: "OTP sent successfully", status: 200, userId: email });
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your Registration OTP',
+      text: `Your OTP for registration is ${otp}. It expires in 5 minutes.`,
+      html: `<p>Your OTP for registration is <b>${otp}</b>. It expires in 5 minutes.</p>`
+    });
+
+    return res.status(200).json({ msg: "OTP sent successfully via email", status: 200, userId: email });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ msg: "Error generating OTP", status: 500 });
+    return res.status(500).json({ msg: "Error generating or sending OTP", status: 500 });
   }
 };
 
+// === OTP Registration Verification ===
 const verifyOtp = async (req, res) => {
   try {
     const { userId, otp } = req.body;
@@ -76,7 +99,7 @@ const Login = async (req, res) => {
 
     const token = jwt.sign(
       { id: loguser._id },
-      process.env.jwt_secret_key,
+      process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
 
@@ -93,7 +116,7 @@ const Login = async (req, res) => {
   }
 };
 
-// === OTP Login ===
+// === OTP Login Request ===
 const requestOtpLogin = async (req, res) => {
   try {
     const { email } = req.body;
@@ -107,15 +130,27 @@ const requestOtpLogin = async (req, res) => {
 
     otpStore[email] = { otp, expiresAt };
 
-    console.log(`OTP for login (${email}): ${otp}`);
+    // Log only in development
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`OTP for login (${email}): ${otp}`);
+    }
 
-    return res.status(200).json({ msg: "OTP sent successfully", status: 200 });
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Your Login OTP',
+      text: `Your OTP for login is ${otp}. It expires in 5 minutes.`,
+      html: `<p>Your OTP for login is <b>${otp}</b>. It expires in 5 minutes.</p>`
+    });
+
+    return res.status(200).json({ msg: "OTP sent successfully via email", status: 200 });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ msg: "Error generating OTP", status: 500 });
+    return res.status(500).json({ msg: "Error generating or sending OTP", status: 500 });
   }
 };
 
+// === OTP Login Verification ===
 const verifyOtpLogin = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -138,7 +173,7 @@ const verifyOtpLogin = async (req, res) => {
 
     const token = jwt.sign(
       { id: user._id },
-      process.env.jwt_secret_key,
+      process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
 

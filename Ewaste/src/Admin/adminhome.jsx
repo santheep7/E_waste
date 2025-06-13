@@ -1,51 +1,64 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { gsap } from 'gsap';
 import AdminNavbar from './adminNavbar';
-
+import axios from 'axios';
+import './adminhome.css'
 export default function AdminHome() {
-  // Mock stats (replace with real data)
-  const stats = [
-    { label: 'Total Users', value: 152 },
-    { label: 'Pickup Requests', value: 87 },
-    { label: 'Completed Pickups', value: 64 },
-  ];
-
-  // Refs for GSAP targets
   const headerRef = useRef(null);
   const cardRefs = useRef([]);
   const aboutRef = useRef(null);
   const footerRef = useRef(null);
 
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    pickupRequests: 0,
+    completedPickups: 0,
+  });
+
   useEffect(() => {
-  // Header: slide down + fade in
-  gsap.fromTo(
-    headerRef.current,
-    { y: -50, opacity: 0 },
-    { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
-  );
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get('http://localhost:9000/api/admin/stats');
+        setStats(res.data);
+      } catch (err) {
+        console.error('Failed to load stats:', err);
+      }
+    };
+    fetchStats();
+  }, []);
 
-  // Stats cards: scale up + fade in with stagger
-  gsap.fromTo(
-    cardRefs.current,
-    { opacity: 0, scale: 0.5 },
-    { opacity: 1, scale: 1, duration: 0.6, stagger: 0.2, ease: 'back.out(1.7)', delay: 0.3 }
-  );
+  useEffect(() => {
+    gsap.fromTo(
+      headerRef.current,
+      { y: -50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
+    );
 
-  // About section: slide in from right + fade in
-  gsap.fromTo(
-    aboutRef.current,
-    { x: 100, opacity: 0 },
-    { x: 0, opacity: 1, duration: 1, ease: 'power2.out', delay: 0.8 }
-  );
+    gsap.fromTo(
+      cardRefs.current,
+      { opacity: 0, scale: 0.5 },
+      { opacity: 1, scale: 1, duration: 0.6, stagger: 0.2, ease: 'back.out(1.7)', delay: 0.3 }
+    );
 
-  // Footer: fade in + slide up
-  gsap.fromTo(
-    footerRef.current,
-    { opacity: 0, y: 30 },
-    { opacity: 1, y: 0, duration: 0.8, ease: 'power1.out', delay: 1.4 }
-  );
-}, []);
+    gsap.fromTo(
+      aboutRef.current,
+      { x: 100, opacity: 0 },
+      { x: 0, opacity: 1, duration: 1, ease: 'power2.out', delay: 0.8 }
+    );
+
+    gsap.fromTo(
+      footerRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'power1.out', delay: 1.4 }
+    );
+  }, [stats]);
+
+  const statData = [
+    { label: 'Total Users', value: stats.totalUsers },
+    { label: 'Pickup Requests', value: stats.pickupRequests },
+    { label: 'Completed Pickups', value: stats.completedPickups },
+  ];
 
   return (
     <div>
@@ -54,12 +67,12 @@ export default function AdminHome() {
         {/* Header */}
         <div className="text-center mb-5" ref={headerRef}>
           <h1 className="text-primary">Welcome, Admin!</h1>
-          <p className="lead">Here's a quick overview of your system.</p>
+          <p className="lead" style={{color:"white"}}>Here's a quick overview of your system.</p>
         </div>
 
         {/* Stats Cards */}
         <div className="row text-center mb-5">
-          {stats.map((item, i) => (
+          {statData.map((item, i) => (
             <div className="col-md-4 mb-3" key={i}>
               <div
                 className="card shadow-sm border-0 p-3"
@@ -89,7 +102,7 @@ export default function AdminHome() {
           </div>
         </div>
 
-        {/* Optional Footer / Quick Links */}
+        {/* Footer */}
         <div className="text-center text-muted small" ref={footerRef}>
           © 2025 E-Waste Management Admin Panel
         </div>

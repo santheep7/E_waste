@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { toast, ToastContainer, Bounce } from 'react-toastify'
+import { toast, ToastContainer, Bounce } from 'react-toastify';
+
 export default function Navbar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -9,16 +10,15 @@ export default function Navbar() {
   const usernameLettersRef = useRef([]);
 
   useEffect(() => {
-    // 1️⃣ Check token
     const token = localStorage.getItem('token');
+    const savedName = localStorage.getItem('name');
+
     setIsLoggedIn(!!token);
 
-    // 2️⃣ Animate username if present
-    const savedName = localStorage.getItem('name');
     if (savedName) {
       setUsername(savedName);
 
-      // delay to ensure spans are rendered
+      // Animate username
       setTimeout(() => {
         gsap.fromTo(
           usernameLettersRef.current,
@@ -34,7 +34,7 @@ export default function Navbar() {
         );
       }, 300);
     }
-  }, []); // <-- only one useEffect
+  }, []);
 
   const handleRequest = () => {
     if (isLoggedIn) {
@@ -46,7 +46,8 @@ export default function Navbar() {
       }, 2000);
     }
   };
-  const handlemyRequest = () => {
+
+  const handleMyRequest = () => {
     if (isLoggedIn) {
       navigate('/UserRequest');
     } else {
@@ -60,7 +61,9 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('name');
-    navigate('/login');
+    localStorage.removeItem('id');
+    navigate('/');
+    window.location.reload(); // Optional: refresh to update navbar instantly
   };
 
   return (
@@ -80,9 +83,7 @@ export default function Navbar() {
       />
       <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
-            E-Waste Management
-          </a>
+          <a className="navbar-brand" href="#">E-Waste Management</a>
           <button
             className="navbar-toggler"
             type="button"
@@ -94,6 +95,7 @@ export default function Navbar() {
           >
             <span className="navbar-toggler-icon"></span>
           </button>
+
           {username && (
             <div className="mx-auto text-primary fw-bold username-display">
               {username.split('').map((letter, i) => (
@@ -107,13 +109,15 @@ export default function Navbar() {
               ))}
             </div>
           )}
+
           <div className="collapse navbar-collapse" id="navbarNavDropdown">
             <ul className="navbar-nav ms-auto">
               <li className="nav-item">
-                <a className="nav-link menu-item" onClick={() => navigate('/')}>
+                <a className="nav-link menu-item" onClick={() => navigate('/homepage')}>
                   Home <span className="underline"></span>
                 </a>
               </li>
+
               <li className="nav-item dropdown">
                 <a
                   className="nav-link dropdown-toggle"
@@ -126,54 +130,46 @@ export default function Navbar() {
                   Account
                 </a>
                 <ul className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                  <li>
-                    <a className="dropdown-item menu-item" onClick={() => navigate('/login')}>
-                      Sign In{/* <span className="underline"></span> */}
-
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item menu-item" onClick={() => navigate('/Userregister')}>
-                      Sign Up
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dropdown-item menu-item" onClick={handleLogout}>
-                      Logout
-                    </a>
-                  </li>
+                  {!isLoggedIn && (
+                    <>
+                      <li>
+                        <a className="dropdown-item menu-item" onClick={() => navigate('/login')}>Sign In</a>
+                      </li>
+                      <li>
+                        <a className="dropdown-item menu-item" onClick={() => navigate('/Userregister')}>Sign Up</a>
+                      </li>
+                    </>
+                  )}
+                  {isLoggedIn && (
+                    <li>
+                      <a className="dropdown-item menu-item" onClick={handleLogout}>Logout</a>
+                    </li>
+                  )}
                 </ul>
               </li>
+
               <li className="nav-item">
-                <a className="nav-link menu-item" onClick={() => navigate('/dashboard')}>
-                  Gallery <span className="underline"></span>
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link menu-item" onClick={handlemyRequest}>
+                <a className="nav-link menu-item" onClick={handleMyRequest}>
                   My Requests <span className="underline"></span>
                 </a>
               </li>
+
               <li className="nav-item">
                 <a className="nav-link menu-item" onClick={handleRequest}>
                   Request <span className="underline"></span>
                 </a>
               </li>
+
               <li className="nav-item">
                 <a className="nav-link menu-item" onClick={() => navigate('/dashboard')}>
-                  About us <span className="underline"></span>
+                  About Us <span className="underline"></span>
                 </a>
               </li>
-              {/* ... other nav-items ... */}
-
-              {/* Animated Username */}
-
             </ul>
           </div>
         </div>
       </nav>
 
-      {/* Hover underline CSS */}
       <style>{`
         .menu-item { position: relative; display: inline-block; cursor: pointer; }
         .underline {
@@ -188,15 +184,14 @@ export default function Navbar() {
         .menu-item:hover .underline {
           width: 100%;
         }
-          .username-display {
-  font-size: 1.8rem;
-  letter-spacing: 1px;
-}
-
-.username-letter {
-  display: inline-block;
-  margin: 8 1px;
-}
+        .username-display {
+          font-size: 1.8rem;
+          letter-spacing: 1px;
+        }
+        .username-letter {
+          display: inline-block;
+          margin: 0 1px;
+        }
       `}</style>
     </>
   );

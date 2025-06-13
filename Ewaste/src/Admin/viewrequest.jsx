@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AdminNavbar from './adminNavbar';
 
 export default function ViewRequests() {
   const [requests, setRequests] = useState([]);
@@ -67,6 +68,8 @@ export default function ViewRequests() {
   }
 
   return (
+    <>
+    <AdminNavbar/>
     <Box p={3}>
       <ToastContainer position="top-right" />
       <Typography variant="h5" gutterBottom>
@@ -92,6 +95,7 @@ export default function ViewRequests() {
             const isCancelled = status.toLowerCase() === 'cancelled';
 
             return (
+              
               <Grid key={_id} item xs={12} sm={6} md={4}>
                 <Card
                   sx={{
@@ -182,5 +186,6 @@ export default function ViewRequests() {
         </Grid>
       )}
     </Box>
+    </>
   );
 }

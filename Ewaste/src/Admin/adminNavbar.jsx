@@ -70,6 +70,14 @@ export default function AdminNavbar() {
               <li className="nav-item">
                 <button
                   className="nav-link menu-item btn btn-link"
+                  onClick={() => navigate('/adminhome')}
+                >
+                  Home<span className="underline" />
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className="nav-link menu-item btn btn-link"
                   onClick={() => navigate('/viewAgent')}
                 >
                   View Agent<span className="underline" />
