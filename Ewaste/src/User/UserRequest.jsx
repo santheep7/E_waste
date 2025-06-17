@@ -13,7 +13,7 @@ import {
   Container
 } from '@mui/material';
 import Navbar from './usernavbar';
-
+import './userReq.css'
 export default function MyRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);

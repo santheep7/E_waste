@@ -8,11 +8,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
 const videos = [
-  { title: 'E-Waste Dangers', url: 'https://youtu.be/MQLadfsvfLo' },
-  { title: 'How Recycling Works', url: 'https://www.youtube.com/embed/LVgT-p2mU5s' },
-  { title: 'Proper Disposal', url: 'https://www.youtube.com/embed/dfcU_5bdH40' },
+  { title: 'E-Waste Dangers', url: 'https://www.youtube.com/embed/MQLadfsvfLo?autoplay=1' },
+  { title: 'How Recycling Works', url: 'https://www.youtube.com/embed/U3KUJTDPsSE?autoplay=1' },
+  { title: 'Useful from E-Waste', url: 'https://www.youtube.com/embed/ldlniZfA2X4?autoplay=1' },
 ];
-
 export default function Home() {
   const [activeVideo, setActiveVideo] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
@@ -44,7 +43,7 @@ export default function Home() {
     });
 
     // Heading typing animation
-    const message = 'Welcome to E waste management';
+    const message = 'Welcome to Ecobin – Let’s Build a Greener Future Together';
     headingRef.current.textContent = message;
     const letters = message.split('');
     headingRef.current.innerHTML = letters
@@ -90,10 +89,10 @@ export default function Home() {
 
     try {
       const res = await fetch("http://localhost:9000/api/chat/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ messages: newMessages }),
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
 
       const data = await res.json();
       if (data.reply) {
@@ -137,6 +136,7 @@ export default function Home() {
                     src={video.url}
                     title={video.title}
                     frameBorder="0"
+                    allow="autoplay; picture-in-picture"
                     allowFullScreen
                   ></iframe>
                 </div>
@@ -182,7 +182,7 @@ export default function Home() {
         </div>
 
         <footer className="footer">
-          <p>&copy; {new Date().getFullYear()} E-Waste Management. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} EcoBin. All rights reserved.</p>
         </footer>
 
         <style>{`

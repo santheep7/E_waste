@@ -2,16 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
-import Navbar from './usernavbar'; 
+import Navbar from './usernavbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
 const videos = [
-  { title: 'E-Waste Dangers', url: 'https://youtu.be/MQLadfsvfLo' },
-  { title: 'How Recycling Works', url: 'https://www.youtube.com/embed/LVgT-p2mU5s' },
-  { title: 'Proper Disposal', url: 'https://www.youtube.com/embed/dfcU_5bdH40' },
+  { title: 'E-Waste Dangers', url: 'https://www.youtube.com/embed/MQLadfsvfLo?autoplay=1' },
+  { title: 'How Recycling Works', url: 'https://www.youtube.com/embed/U3KUJTDPsSE?autoplay=1' },
+  { title: 'Useful from E-Waste', url: 'https://www.youtube.com/embed/ldlniZfA2X4?autoplay=1' },
 ];
+
 
 export default function UserHome() {
   const [activeVideo, setActiveVideo] = useState(null);
@@ -47,7 +48,7 @@ export default function UserHome() {
     });
 
     // Animated heading
-    const message = 'Welcome to E waste management';
+    const message = 'Welcome to Ecobin – Let’s Build a Greener Future Together';
     headingRef.current.textContent = message;
     const letters = message.split('');
     headingRef.current.innerHTML = letters
@@ -114,8 +115,10 @@ export default function UserHome() {
                     src={video.url}
                     title={video.title}
                     frameBorder="0"
+                    allow="autoplay; picture-in-picture"
                     allowFullScreen
                   ></iframe>
+
                 </div>
               )}
             </div>
@@ -140,7 +143,7 @@ export default function UserHome() {
         </div>
 
         <footer className="footer">
-          <p>&copy; {new Date().getFullYear()} E-Waste Management. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Eco Bin. All rights reserved.</p>
         </footer>
 
         <style>{`

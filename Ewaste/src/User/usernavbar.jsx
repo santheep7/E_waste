@@ -83,7 +83,7 @@ export default function Navbar() {
       />
       <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">E-Waste Management</a>
+          <a className="navbar-brand" href="#">Eco Bin</a>
           <button
             className="navbar-toggler"
             type="button"
