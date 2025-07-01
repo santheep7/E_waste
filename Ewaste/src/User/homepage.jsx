@@ -1,249 +1,596 @@
-import React, { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { TextPlugin } from 'gsap/TextPlugin';
-import Navbar from './usernavbar';
+import React, { useState, useRef } from 'react';
+import { ChevronRight, ChevronLeft, Recycle, Facebook, Twitter, Instagram, Mail } from 'lucide-react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-gsap.registerPlugin(ScrollTrigger, TextPlugin);
-
-const videos = [
-  { title: 'E-Waste Dangers', url: 'https://www.youtube.com/embed/MQLadfsvfLo?autoplay=1' },
-  { title: 'How Recycling Works', url: 'https://www.youtube.com/embed/U3KUJTDPsSE?autoplay=1' },
-  { title: 'Useful from E-Waste', url: 'https://www.youtube.com/embed/ldlniZfA2X4?autoplay=1' },
+import Navbar from './usernavbar';
+import Footer from './Footer'
+const heroSlides = [
+  {
+    title: "Greener Future Together",
+    description: "Join our mission to reduce e-waste and create a sustainable future",
+    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3",
+    cta: "Learn More",
+    target: "features" // Added target identifier
+  },
+  {
+    title: "E-Waste Dangers",
+    description: "Understand the environmental impact of improper e-waste disposal",
+    image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e",
+    cta: "Watch Video",
+    target: "video" // Added target identifier
+  },
+  {
+    title: "How Recycling Works",
+    description: "Discover our efficient e-waste recycling process",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab",
+    cta: "See Process",
+    target: "process" // Added target identifier
+  }
 ];
+
+const stats = [
+  { value: 12500, label: 'Devices Recycled' },
+  { value: 3200, label: 'Happy Users' },
+  { value: 45, label: 'Locations' },
+  { value: 98, label: 'Satisfaction Rate', unit: '%' }
+];
+
+const features = [
+  {
+    title: "Easy Scheduling",
+    description: "Schedule e-waste pickup with just a few clicks",
+    icon: "📅"
+  },
+  {
+    title: "Track Impact",
+    description: "See how much e-waste you've diverted from landfills",
+    icon: "📊"
+  },
+  {
+    title: "Rewards Program",
+    description: "Earn points for recycling that you can redeem",
+    icon: "🏆"
+  }
+];
+
+
 export default function Home() {
-  const [activeVideo, setActiveVideo] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [userInput, setUserInput] = useState('');
-  const [isBotTyping, setIsBotTyping] = useState(false);
+  const [currentHeroSlide, setCurrentHeroSlide] = useState(0);
   const [showChat, setShowChat] = useState(false);
 
-  const boxRefs = useRef([]);
-  const bgRef = useRef(null);
-  const headingRef = useRef(null);
+ const token = localStorage.getItem('token')
+ const isLoggedIn =!!token;
+  // Create refs for each section
+  const featuresRef = useRef(null);
+  const videoRef = useRef(null);
+  const processRef = useRef(null);
 
-  useEffect(() => {
-    // Animated background circles
-    const circles = bgRef.current.querySelectorAll('.bg-circle');
-    circles.forEach(circle => {
-      gsap.fromTo(
-        circle,
-        { y: gsap.utils.random(-100, 100), x: gsap.utils.random(-100, 100), opacity: 0 },
-        {
-          y: gsap.utils.random(-200, 200),
-          x: gsap.utils.random(-200, 200),
-          opacity: gsap.utils.random(0.2, 0.8),
-          duration: gsap.utils.random(30, 50),
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut',
-        }
-      );
-    });
+  const nextHeroSlide = () => {
+    setCurrentHeroSlide((prev) => (prev === heroSlides.length - 1 ? 0 : prev + 1));
+  };
 
-    // Heading typing animation
-    const message = 'Welcome to Ecobin – Let’s Build a Greener Future Together';
-    headingRef.current.textContent = message;
-    const letters = message.split('');
-    headingRef.current.innerHTML = letters
-      .map(letter => `<span class=\"bounce-letter\">${letter === ' ' ? '\u00A0' : letter}</span>`)
-      .join('');
-    const spans = headingRef.current.querySelectorAll('span');
-    gsap.set(spans, { opacity: 0, scale: 0.5 });
-    gsap.to(spans, {
-      opacity: 1,
-      scale: 1,
-      stagger: 0.05,
-      ease: 'back.out(1.7)',
-      duration: 0.6,
-    });
+  const prevHeroSlide = () => {
+    setCurrentHeroSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
+  };
 
-    // Scroll-trigger for video boxes
-    boxRefs.current.forEach(box => {
-      gsap.fromTo(
-        box,
-        { opacity: 0, y: 50, scale: 0.9 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: box,
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    });
-  }, []);
+  // Function to handle smooth scrolling
+  const scrollToSection = (target) => {
+    let ref;
+    switch (target) {
+      case 'features':
+        ref = featuresRef;
+        break;
+      case 'video':
+        ref = videoRef;
+        break;
+      case 'process':
+        ref = processRef;
+        break;
+      default:
+        return;
+    }
 
-  const handleSendMessage = async () => {
-    if (!userInput.trim()) return;
-    const newMessages = [...chatMessages, { role: 'user', content: userInput }];
-    setChatMessages(newMessages);
-    setUserInput('');
-    setIsBotTyping(true);
-
-    try {
-      const res = await fetch("http://localhost:9000/api/chat/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+    if (ref.current) {
+      ref.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
       });
-
-      const data = await res.json();
-      if (data.reply) {
-        setChatMessages(prev => [...prev, { role: 'bot', content: data.reply }]);
-      }
-    } catch (error) {
-      console.error('Chatbot error:', error);
-      setChatMessages(prev => [...prev, { role: 'bot', content: 'Sorry, something went wrong.' }]);
-    } finally {
-      setIsBotTyping(false);
     }
   };
 
   return (
     <>
       <Navbar />
-      <div className="user-home">
-        <div className="animated-bg" />
-        <div className="background-circles" ref={bgRef}>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="bg-circle" />
-          ))}
-        </div>
-
-        <div className="content">
-          <h1 className="heading" ref={headingRef}></h1>
-
-          {videos.map((video, i) => (
-            <div
-              key={i}
-              ref={el => (boxRefs.current[i] = el)}
-              className="video-box"
-              onClick={() => setActiveVideo(activeVideo === i ? null : i)}
-            >
-              <h3 className="video-title">{video.title}</h3>
-              {activeVideo === i && (
-                <div className="video-wrapper">
-                  <iframe
-                    width="100%"
-                    height="400"
-                    src={video.url}
-                    title={video.title}
-                    frameBorder="0"
-                    allow="autoplay; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              )}
+      <div className="homepage">
+        {/* Hero Carousel */}
+        <section className="hero-carousel">
+          <div className="hero-slide"
+            style={{ backgroundImage: `url(${heroSlides[currentHeroSlide].image})` }}>
+            <div className="hero-content">
+              <h1>{heroSlides[currentHeroSlide].title}</h1>
+              <p>{heroSlides[currentHeroSlide].description}</p>
+              <button
+                className="cta-button"
+                onClick={() => scrollToSection(heroSlides[currentHeroSlide].target)}
+              >
+                {heroSlides[currentHeroSlide].cta}
+              </button>
             </div>
-          ))}
-
-          {/* Floating Chat Icon */}
-          <div className="floating-chat" onClick={() => setShowChat(!showChat)}>
-            💬
           </div>
+          <button className="carousel-nav prev" onClick={prevHeroSlide}>
+            <ChevronLeft size={32} />
+          </button>
+          <button className="carousel-nav next" onClick={nextHeroSlide}>
+            <ChevronRight size={32} />
+          </button>
+          <div className="carousel-dots">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                className={`dot ${index === currentHeroSlide ? 'active' : ''}`}
+                onClick={() => setCurrentHeroSlide(index)}
+              />
+            ))}
+          </div>
+        </section>
 
-          {/* Chat Panel */}
-          {showChat && (
-            <div className="chatbot-panel">
-              <h5 className="text-white mb-2">Ask Me Anything!</h5>
-              <div className="chat-history mb-2">
-                {chatMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`chat-bubble ${msg.role === 'user' ? 'user' : 'bot'}`}
-                  >
-                    {msg.content}
-                  </div>
-                ))}
-                {isBotTyping && <div className="chat-bubble bot">Typing...</div>}
+        {/* Stats Section */}
+        <section className="stats-section">
+          <div className="stats-container">
+            {stats.map((stat, index) => (
+              <div className="stat-card" key={index}>
+                <h3>{stat.value}{stat.unit}</h3>
+                <p>{stat.label}</p>
               </div>
-              <div className="chat-input d-flex">
-                <input
-                  type="text"
-                  className="form-control me-2"
-                  value={userInput}
-                  onChange={e => setUserInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type your message..."
-                />
-                <button className="btn btn-primary" onClick={handleSendMessage}>
-                  Send
-                </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="features-section" ref={featuresRef}>
+          <h2>Why Choose EcoBin?</h2>
+          <div className="features-grid">
+            {features.map((feature, index) => (
+              <div className="feature-card" key={index}>
+                <div className="feature-icon">{feature.icon}</div>
+                <h3>{feature.title}</h3>
+                <p>{feature.description}</p>
               </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Video Section */}
+        <section className="video-section" ref={videoRef}>
+          <h2>Learn About E-Waste</h2>
+          <div className="video-container">
+            <iframe
+              width="100%"
+              height="500"
+              src="https://www.youtube.com/embed/MQLadfsvfLo"
+              title="E-Waste Dangers"
+              frameBorder="0"
+              allowFullScreen>
+            </iframe>
+          </div>
+        </section>
+
+        {/* Process Section */}
+        <section className="process-section" ref={processRef}>
+          <h2>Our Recycling Process</h2>
+          <div className="process-steps">
+            <div className="process-step">
+              <div className="step-number">1</div>
+              <h3>Collection</h3>
+              <p>We pick up your e-waste from your location at a scheduled time</p>
             </div>
-          )}
+            <div className="process-step">
+              <div className="step-number">2</div>
+              <h3>Sorting</h3>
+              <p>Items are sorted by material type for proper recycling</p>
+            </div>
+            <div className="process-step">
+              <div className="step-number">3</div>
+              <h3>Processing</h3>
+              <p>Materials are broken down and prepared for reuse</p>
+            </div>
+            <div className="process-step">
+              <div className="step-number">4</div>
+              <h3>Recycling</h3>
+              <p>Materials are transformed into new products</p>
+            </div>
+          </div>
+        </section>
+
+
+
+        {/* Floating Chat */}
+        <div className="floating-chat" onClick={() => setShowChat(!showChat)}>
+          💬
         </div>
 
-        <footer className="footer">
-          <p>&copy; {new Date().getFullYear()} EcoBin. All rights reserved.</p>
-        </footer>
+        <Footer isLoggedIn={isLoggedIn} />
 
-        <style>{`
-          /* Background & layout */
-          @keyframes gradientBg {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        <style jsx>{`
+          /* Global Styles */
+          .homepage {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            overflow-x: hidden;
           }
-          .user-home { position: relative; overflow: hidden; min-height: 100vh; font-family: 'Arial', sans-serif; }
-          .animated-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(-45deg, #00c6ff, #0072ff, #00ff9d, #f9f047);
-            background-size: 400% 400%; animation: gradientBg 15s ease infinite; z-index: -2;
+          
+          h1, h2, h3 {
+            margin: 0;
+            font-weight: 600;
           }
-          .background-circles { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; pointer-events: none; }
-          .bg-circle { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.3); }
-          .content { position: relative; z-index: 1; max-width: 900px; margin: auto; padding: 100px 20px; text-align: center; }
-          .heading { font-size: 2.8rem; letter-spacing: 3px; margin-bottom: 2.5rem; display: inline-block; color: white; }
-          .video-box {
-            background: #ffffffcc; border-radius: 16px; padding: 40px; margin: 50px 0; cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          
+          /* Hero Carousel */
+          .hero-carousel {
+            position: relative;
+            height: 80vh;
+            width: 100%;
+            overflow: hidden;
           }
-          .video-box:hover { transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-          .video-title { font-size: 1.9rem; color: #0072ff; margin-bottom: 20px; }
-          .video-wrapper { margin-top: 25px; }
-          .footer { text-align: center; padding: 20px 10px; color: white; background-color: rgba(0, 0, 0, 0.3); }
-
-          /* Floating Chat Button */
+          
+          .hero-slide {
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            transition: all 0.5s ease;
+          }
+          
+          .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+          }
+          
+          .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+          }
+          
+          .hero-content p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+          }
+          
+          .cta-button {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: white;
+            color: #2E7D32;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          }
+          
+          .carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            z-index: 10;
+            transition: all 0.3s ease;
+          }
+          
+          .carousel-nav:hover {
+            background: rgba(255,255,255,0.3);
+          }
+          
+          .prev {
+            left: 2rem;
+          }
+          
+          .next {
+            right: 2rem;
+          }
+          
+          .carousel-dots {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+          }
+          
+          .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .dot.active {
+            background: white;
+            transform: scale(1.2);
+          }
+          
+          /* Stats Section */
+          .stats-section {
+            background: #f8f9fa;
+            padding: 4rem 2rem;
+          }
+          
+          .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+          }
+          
+          .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+          }
+          
+          .stat-card h3 {
+            font-size: 2.5rem;
+            color: #2E7D32;
+            margin-bottom: 0.5rem;
+          }
+          
+          /* Features Section */
+          .features-section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+          }
+          
+          .features-section h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #2E7D32;
+          }
+          
+          .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+          }
+          
+          .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+          }
+          
+          .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+          }
+          
+          .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+          }
+          
+          .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #2E7D32;
+          }
+          
+          /* Video Section */
+          .video-section {
+            padding: 4rem 2rem;
+            background: #f8f9fa;
+          }
+          
+          .video-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            color: #2E7D32;
+          }
+          
+          .video-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          }
+          
+          /* Process Section */
+          .process-section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+          }
+          
+          .process-section h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            color: #2E7D32;
+          }
+          
+          .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+          }
+          
+          .process-step {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+          }
+          
+          .process-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+          }
+          
+          .step-number {
+            width: 50px;
+            height: 50px;
+            background: #2E7D32;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+          }
+          
+          /* CTA Section */
+          .cta-section {
+            background: #2E7D32;
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+          }
+          
+          .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+          }
+          
+          .cta-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+          }
+          
+          .cta-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+          }
+          
+          .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+          }
+          
+          .primary-button, .secondary-button {
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+          }
+          
+          .primary-button {
+            background: white;
+            color: #2E7D32;
+            border: none;
+          }
+          
+          .secondary-button {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+          }
+          
+          .primary-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          }
+          
+          .secondary-button:hover {
+            background: rgba(255,255,255,0.1);
+          }
+          
+          /* Floating Chat */
           .floating-chat {
-            position: fixed; bottom: 25px; right: 25px; background: #0072ff;
-            color: white; border-radius: 50%; width: 60px; height: 60px;
-            font-size: 26px; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: background 0.3s ease;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #2E7D32;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
           }
-          .floating-chat:hover { background: #00c6ff; }
-
-          /* Chat Panel */
-          .chatbot-panel {
-            position: fixed; bottom: 100px; right: 25px; width: 300px;
-            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(12px);
-            padding: 15px; border-radius: 16px; z-index: 9998;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+          
+          .floating-chat:hover {
+            transform: scale(1.1);
           }
-          .chat-history { max-height: 200px; overflow-y: auto; margin-bottom: 10px;
-            background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;
+          
+          /* Responsive Styles */
+          @media (max-width: 768px) {
+            .hero-content h1 {
+              font-size: 2.5rem;
+            }
+            
+            .hero-content p {
+              font-size: 1.2rem;
+            }
+            
+            .stats-container, .features-grid, .process-steps {
+              grid-template-columns: 1fr 1fr;
+            }
+            
+            .cta-buttons {
+              flex-direction: column;
+              align-items: center;
+            }
           }
-          .chat-bubble { padding: 8px 14px; margin: 5px 0; border-radius: 20px; font-size: 0.9rem; }
-          .chat-bubble.user { background-color: #00c6ff; color: white; align-self: flex-end; text-align: right; }
-          .chat-bubble.bot { background-color: #ffffffaa; color: #333; align-self: flex-start; text-align: left; }
-
-          /* Heading glow */
-          @keyframes outlineLight {
-            0%,100% { text-shadow: 0 0 5px #00fff7,0 0 10px #00fff7,0 0 20px #00fff7,0 0 40px #00fff7; }
-            50% { text-shadow: 0 0 10px #00fff7,0 0 20px #00fff7,0 0 30px #00fff7,0 0 60px #00fff7; }
+          
+          @media (max-width: 480px) {
+            .hero-content h1 {
+              font-size: 2rem;
+            }
+            
+            .stats-container, .features-grid, .process-steps {
+              grid-template-columns: 1fr;
+            }
+            
+            .carousel-nav {
+              width: 40px;
+              height: 40px;
+            }
           }
-          .bounce-letter { display: inline-block; font-weight:700; background: linear-gradient(270deg,#00fff7,#fff,#00fff7); background-size:600% 600%;
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: runningLight 3s linear infinite;
-          }
-          @keyframes runningLight { 0% {background-position:0% 50%;} 100% {background-position:100% 50%;} }
         `}</style>
       </div>
     </>

@@ -1,6 +1,7 @@
 const Request = require('../model/Requestmodel');
 const User = require('../model/Usermodel');
 const Agent = require('../model/Agentmodel')
+const message = require('../model/contactmodel')
 // for display users
 const getuser = async(req,res)=>{
   try{
@@ -12,6 +13,18 @@ const getuser = async(req,res)=>{
     res.status(500).json({message:'Failed to fetch users'})
   }
 };
+// for geting message
+const getmessage = async(req,res)=>{
+  try{
+    const msg = await message.find()
+    console.log("message",msg)
+    res.status(200).json(msg)
+  }catch(err){
+    console.log('error in fetching message',err.message)
+    res.status(500).json({message:'Failed to fetch the message'})
+
+  }
+}
 // for deleting user
 
 const deluser = async (req, res) => {
@@ -84,4 +97,4 @@ const getAdminStats = async (req, res) => {
   }
 }
 
-module.exports = {getuser,deluser,getAgent,delagent,approveAgent,getAdminStats}
+module.exports = {getuser,deluser,getAgent,delagent,approveAgent,getAdminStats,getmessage}

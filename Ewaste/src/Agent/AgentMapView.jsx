@@ -16,22 +16,34 @@ L.Icon.Default.mergeOptions({
 export default function AgentMapView() {
   const [requests, setRequests] = useState([]);
 
-  useEffect(() => {
-    axios.get('http://localhost:9000/api/req/approvedrequests')
-      .then(res => {
-        console.log('All Approved Requests:', res.data);
-        const withLocations = res.data.map(r => ({
-          id: r._id,
-          lat: r.latitude,
-          lng: r.longitude
-        }));
-        console.log('Location Check:', withLocations);
-        setRequests(res.data);
-      })
-      .catch(err => {
-        console.error('Error fetching approved requests:', err.message);
-      });
-  }, []);
+ useEffect(() => {
+  const agentId = localStorage.getItem('agentId'); // or sessionStorage, depending on how you store it
+
+  if (!agentId) {
+    console.error('Agent ID not found in local storage');
+    return;
+  }
+
+  axios.get('http://localhost:9000/api/req/approvedrequests', {
+    headers: {
+      'x-agent-id': agentId
+    }
+  })
+    .then(res => {
+      console.log('All Approved Requests:', res.data);
+      const withLocations = res.data.map(r => ({
+        id: r._id,
+        lat: r.latitude,
+        lng: r.longitude
+      }));
+      console.log('Location Check:', withLocations);
+      setRequests(res.data);
+    })
+    .catch(err => {
+      console.error('Error fetching approved requests:', err.message);
+    });
+}, []);
+
 
   const validRequests = requests.filter(req => req.latitude && req.longitude);
 

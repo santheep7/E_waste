@@ -8,10 +8,11 @@ import {
   Alert,
   useMediaQuery,
   useTheme,
+  Paper,
+  Container
 } from '@mui/material';
 import { gsap } from 'gsap';
 import AgentNavbar from './agentnav';
-import './agentuserReq.css';
 
 export default function ViewApprovedRequests() {
   const [requests, setRequests] = useState([]);
@@ -22,28 +23,43 @@ export default function ViewApprovedRequests() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    const fetchApproved = async () => {
-      try {
-        const res = await axios.get('http://localhost:9000/api/req/approvedrequests');
-        setRequests(res.data);
+  const fetchApproved = async () => {
+    try {
+      const agentId = localStorage.getItem('agentId'); // retrieve agent id from storage or session
+
+      if (!agentId) {
+        setError('Agent ID not found in local storage');
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching approved requests:', err);
-        setError('Failed to load approved requests.');
-        setLoading(false);
+        return;
       }
-    };
-    fetchApproved();
-  }, []);
+
+      const res = await axios.get('http://localhost:9000/api/req/approvedrequests', {
+        headers: {
+          'x-agent-id': agentId
+        }
+      });
+
+      setRequests(res.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching approved requests:', err);
+      setError('Failed to load approved requests.');
+      setLoading(false);
+    }
+  };
+
+  fetchApproved();
+}, []);
+
 
   useEffect(() => {
     if (requests.length > 0) {
       gsap.fromTo(
         rowsRef.current,
-        { opacity: 0, x: -50 },
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
-          x: 0,
+          y: 0,
           duration: 0.6,
           ease: 'power3.out',
           stagger: 0.15,
@@ -101,104 +117,158 @@ export default function ViewApprovedRequests() {
           px: 2,
           position: 'relative',
           overflow: 'hidden',
-          // No background here!
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '40%',
+            height: '100%',
+            background: 'linear-gradient(135deg, rgba(46,125,50,0.05) 0%, rgba(46,125,50,0.01) 100%)',
+            zIndex: 0,
+            
+          }
         }}
       >
-        <Box
+        <Container
+          maxWidth="lg"
           sx={{
             position: 'relative',
             zIndex: 1,
-            maxWidth: 900,
-            margin: '0 auto',
+            marginTop:'50px'
           }}
         >
-          {requests.map((req, idx) => (
-            <Box
-              key={req._id}
-              ref={(el) => (rowsRef.current[idx] = el)}
-              sx={{
-                display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row',
-                justifyContent: 'space-between',
-                alignItems: isMobile ? 'flex-start' : 'center',
-                backgroundColor: 'white',
-                borderRadius: 2,
-                boxShadow: 3,
-                mb: 3,
-                p: 2,
-                gap: 2,
-                cursor: 'default',
-                userSelect: 'none',
-                transition: 'background-color 0.3s ease',
-                '&:hover': {
-                  backgroundColor: '#e3f2fd',
-                },
-              }}
-            >
-              <Box sx={{ flex: 2 }}>
-                <Typography variant="subtitle1" fontWeight={600}>
-                  Request #{idx + 1}
-                </Typography>
-                <Typography>
-                  <strong>User:</strong> {req.user?.name || 'N/A'}
-                </Typography>
-                <Typography>
-                  <strong>Email:</strong> {req.user?.email || 'N/A'}
-                </Typography>
-                <Typography>
-                  <strong>E-Waste Type:</strong> {req.ewasteType}
-                </Typography>
-                <Typography>
-                  <strong>Quantity:</strong> {req.quantity}
-                </Typography>
-                <Typography>
-                  <strong>Pickup Date:</strong>{' '}
-                  {new Date(req.pickupDate).toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </Typography>
-                <Typography>
-                  <strong>Slot:</strong> {req.timeSlot}
-                </Typography>
-                <Typography>
-                  <strong>Notes:</strong> {req.notes || '-'}
-                </Typography>
-              </Box>
-              <Box
+          <Typography variant="h4" component="h1" gutterBottom sx={{ 
+            fontWeight: 600,
+            color: '#2e7d32',
+            mb: 4,
+            textAlign: 'center',
+            position: 'relative',
+            '&::after': {
+              content: '""',
+              display: 'block',
+              width: '80px',
+              height: '4px',
+              background: '#2e7d32',
+              margin: '16px auto 0',
+              borderRadius: '2px',
+             
+            }
+          }}>
+            Approved Pickup Requests
+          </Typography>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {requests.map((req, idx) => (
+              <Paper
+                key={req._id}
+                ref={(el) => (rowsRef.current[idx] = el)}
+                elevation={3}
                 sx={{
-                  flex: 1,
                   display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: isMobile ? 'flex-start' : 'flex-end',
-                  gap: 1,
-                  minWidth: 140,
+                  flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between',
+                  alignItems: isMobile ? 'flex-start' : 'center',
+                  backgroundColor: 'white',
+                  borderRadius: '12px',
+                  p: 3,
+                  gap: 3,
+                  transition: 'all 0.3s ease',
+                  borderLeft: '4px solid #2e7d32',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 12px rgba(0,0,0,0.1)'
+                  },
                 }}
               >
-                <Typography variant="subtitle2" color="primary" fontWeight={600}>
-                  Status: {req.status}
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  color={req.isPickedUp ? 'success.main' : 'error.main'}
-                  fontWeight={600}
+                <Box sx={{ flex: 2 }}>
+                  <Typography variant="subtitle1" fontWeight={600} color="text.primary" gutterBottom>
+                    Request #{idx + 1}
+                  </Typography>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 2 }}>
+                    <Box>
+                      <Typography variant="body2">
+                        <strong>User:</strong> {req.user?.name || 'N/A'}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Email:</strong> {req.user?.email || 'N/A'}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>E-Waste Type:</strong> {req.ewasteType}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2">
+                        <strong>Quantity:</strong> {req.quantity}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Pickup Date:</strong> {new Date(req.pickupDate).toLocaleDateString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Slot:</strong> {req.timeSlot}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  {req.notes && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2">
+                        <strong>Notes:</strong> {req.notes}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: isMobile ? 'flex-start' : 'flex-end',
+                    gap: 2,
+                    minWidth: isMobile ? '100%' : '140px',
+                  }}
                 >
-                  Picked Up: {req.isPickedUp ? 'Yes' : 'No'}
-                </Typography>
-                <Button
-                  variant={req.isPickedUp ? 'outlined' : 'contained'}
-                  color={req.isPickedUp ? 'warning' : 'primary'}
-                  size="small"
-                  onClick={() => handleTogglePickup(req._id, req.isPickedUp)}
-                  fullWidth={isMobile}
-                >
-                  {req.isPickedUp ? 'Undo Pickup' : 'Mark as Picked Up'}
-                </Button>
-              </Box>
-            </Box>
-          ))}
-        </Box>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: isMobile ? 'flex-start' : 'flex-end',
+                    gap: 1
+                  }}>
+                    <Typography variant="subtitle2" color="primary" fontWeight={600}>
+                      Status: {req.status}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      color={req.isPickedUp ? 'success.main' : 'error.main'}
+                      fontWeight={600}
+                    >
+                      Picked Up: {req.isPickedUp ? 'Yes' : 'No'}
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant={req.isPickedUp ? 'outlined' : 'contained'}
+                    color={req.isPickedUp ? 'warning' : 'primary'}
+                    size={isMobile ? 'medium' : 'small'}
+                    onClick={() => handleTogglePickup(req._id, req.isPickedUp)}
+                    fullWidth={isMobile}
+                    sx={{
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {req.isPickedUp ? 'Undo Pickup' : 'Mark as Picked Up'}
+                  </Button>
+                </Box>
+              </Paper>
+            ))}
+          </Box>
+        </Container>
       </Box>
     </>
   );

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
-const secretKey = process.env.JWT_SECRET_KEY // or your actual secret
+const secretKey = process.env.JWT_SECRET_KEY 
 
 const verifyToken = (req, res, next) => {
   const token = req.header('Authorization');
@@ -9,7 +9,7 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, secretKey);
-    req.user = decoded; // THIS IS IMPORTANT
+    req.user = decoded; 
     next();
   } catch (err) {
     res.status(400).json({ message: 'Invalid Token' });

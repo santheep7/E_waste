@@ -23,6 +23,7 @@ const GetUser = lazy(() => import('./Admin/viewuser'));
 const ViewRequests = lazy(() => import('./Admin/viewrequest'));
 const AgentHome =lazy(()=>import('./Agent/agenthome'));
 const AgentLogin =lazy(()=>import('./Agent/agentlogin'));
+const ContactForm =lazy(()=>import('./User/contact'));
 export default function App() {
   return (
     <Router>
@@ -30,6 +31,7 @@ export default function App() {
         <Routes>
           <Route path="/homepage" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/contact" element={<ContactForm />} />
           <Route path="/adminlogin" element={<AdminLogin />} />
           <Route path="/Userregister" element={<Register />} />
           <Route path="/request" element={<Request />} />

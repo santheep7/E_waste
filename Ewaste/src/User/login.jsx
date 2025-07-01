@@ -191,6 +191,8 @@ await axios.post("http://localhost:9000/api/user/request-otp-login", { email: re
                   onChange={handleChange}
                   error={!!error.email}
                   helperText={error.email}
+                  autoComplete='off'
+                  autoFocus
                 />
                 <TextField
                   margin="normal"
@@ -202,6 +204,7 @@ await axios.post("http://localhost:9000/api/user/request-otp-login", { email: re
                   onChange={handleChange}
                   error={!!error.password}
                   helperText={error.password}
+                  autoComplete='off'
                 />
                 <Button fullWidth variant="contained" sx={{ mt: 2 }} onClick={handlePasswordLogin} disabled={loading}>
                   {loading ? "Signing in..." : "Sign In"}

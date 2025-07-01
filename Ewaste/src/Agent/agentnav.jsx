@@ -26,7 +26,7 @@ const AnimatedUnderlineButton = React.forwardRef(({ children, ...props }, ref) =
       width: '100%',
       duration: 0.8,
       ease: 'power2.out',
-      boxShadow: '0 0 10px #90caf9',
+      boxShadow: '0 0 10px #64ffda',
     });
     gsap.set(underlineRef.current, { width: '0%', boxShadow: 'none' });
   }, []);
@@ -47,15 +47,16 @@ const AnimatedUnderlineButton = React.forwardRef(({ children, ...props }, ref) =
       onMouseLeave={handleMouseLeave}
       disableRipple
       sx={{
-        color: '#ffff', // lighter blue for good contrast
+        color: '#ffffff',
         textTransform: 'none',
-        fontWeight: 600,
+        fontWeight: 500,
         position: 'relative',
         paddingBottom: '6px',
         overflow: 'visible',
+        fontSize: '0.9rem',
         '&:hover': {
           backgroundColor: 'transparent',
-          color: '#e3f2fd',
+          color: '#64ffda',
         },
       }}
     >
@@ -66,9 +67,9 @@ const AnimatedUnderlineButton = React.forwardRef(({ children, ...props }, ref) =
           position: 'absolute',
           bottom: 0,
           left: 0,
-          height: '4px',
+          height: '2px',
           width: '0%',
-          background: 'linear-gradient(90deg, #90caf9, #42a5f5)',
+          background: 'linear-gradient(90deg, #64ffda, #00bfa5)',
           borderRadius: '2px',
           pointerEvents: 'none',
         }}
@@ -118,9 +119,26 @@ export default function AgentNavbar() {
 
   if (!agentName) {
     return (
-      <AppBar position="fixed" elevation={0} sx={{ backgroundColor: '#AF3E3E' }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#e3f2fd' }}>
+      <AppBar 
+        position="fixed" 
+        elevation={0} 
+        sx={{ 
+          backgroundColor: '#121212',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+          backdropFilter: 'blur(10px)',
+          background: 'rgba(18, 18, 18, 0.8)'
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between', padding: '0 24px' }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 700, 
+              color: '#64ffda',
+              letterSpacing: '0.05rem',
+              fontFamily: '"Roboto Mono", monospace'
+            }}
+          >
             AgentZone
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -137,20 +155,67 @@ export default function AgentNavbar() {
   }
 
   return (
-    <AppBar position="fixed" elevation={0} sx={{ backgroundColor: '#AF3E3E' }}>
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, color: '#e3f2fd' }}>
+    <AppBar 
+      position="fixed" 
+      elevation={0} 
+      sx={{ 
+        backgroundColor: '#121212',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+        backdropFilter: 'blur(10px)',
+        background: 'rgba(18, 18, 18, 0.8)'
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between', padding: '0 24px' }}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 700, 
+            color: '#64ffda',
+            letterSpacing: '0.05rem',
+            fontFamily: '"Roboto Mono", monospace'
+          }}
+        >
           AgentZone
         </Typography>
 
         {isMobile ? (
           <>
-            <IconButton edge="end" onClick={handleMenu} sx={{ color: '#e3f2fd' }}>
+            <IconButton 
+              edge="end" 
+              onClick={handleMenu} 
+              sx={{ 
+                color: '#ffffff',
+                '&:hover': {
+                  backgroundColor: 'rgba(100, 255, 218, 0.1)'
+                }
+              }}
+            >
               <MenuIcon />
             </IconButton>
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+            <Menu 
+              anchorEl={anchorEl} 
+              open={Boolean(anchorEl)} 
+              onClose={handleClose}
+              PaperProps={{
+                style: {
+                  backgroundColor: '#1e1e1e',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.12)'
+                }
+              }}
+            >
               {navLinks.map(({ label, path }) => (
-                <MenuItem key={label} onClick={handleClose} component={Link} to={path}>
+                <MenuItem 
+                  key={label} 
+                  onClick={handleClose} 
+                  component={Link} 
+                  to={path}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(100, 255, 218, 0.1)'
+                    }
+                  }}
+                >
                   {label}
                 </MenuItem>
               ))}
@@ -159,22 +224,49 @@ export default function AgentNavbar() {
                   handleClose();
                   handleLogout();
                 }}
+                sx={{
+                  color: '#ff5252',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 82, 82, 0.1)'
+                  }
+                }}
               >
                 Logout
               </MenuItem>
             </Menu>
           </>
         ) : (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             {navLinks.map(({ label, path }) => (
               <AnimatedUnderlineButton key={label} component={Link} to={path}>
                 {label}
               </AnimatedUnderlineButton>
             ))}
-            <Typography variant="body1" sx={{ fontWeight: 500, color: '#e3f2fd' }}>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                fontWeight: 500, 
+                color: '#ffffff',
+                fontFamily: '"Roboto", sans-serif',
+                fontSize: '0.9rem'
+              }}
+            >
               Hi, {agentName}
             </Typography>
-            <AnimatedUnderlineButton onClick={handleLogout}>Logout</AnimatedUnderlineButton>
+            <AnimatedUnderlineButton 
+              onClick={handleLogout}
+              sx={{
+                color: '#ff5252',
+                '&:hover': {
+                  color: '#ff5252',
+                },
+                '& span': {
+                  background: 'linear-gradient(90deg, #ff5252, #d32f2f)'
+                }
+              }}
+            >
+              Logout
+            </AnimatedUnderlineButton>
           </Box>
         )}
       </Toolbar>

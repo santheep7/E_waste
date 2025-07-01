@@ -22,10 +22,35 @@ export default function Register() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [tempUserId, setTempUserId] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const navigate = useNavigate();
 
+  const checkPasswordStrength = (password) => {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+    return score;
+  };
+
+  const getStrengthColor = (score) => {
+    switch (score) {
+      case 1: return 'red';
+      case 2: return 'orange';
+      case 3: return 'yellowgreen';
+      case 4: return 'green';
+      default: return '#ccc';
+    }
+  };
+
   const handleChange = (e) => {
-    setRecord({ ...record, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setRecord({ ...record, [name]: value });
+
+    if (name === "password") {
+      setPasswordStrength(checkPasswordStrength(value));
+    }
   };
 
   const validate = () => {
@@ -34,10 +59,18 @@ export default function Register() {
     if (!record.place.trim()) newError.place = "Place is required";
     if (!record.address.trim()) newError.address = "Address is required";
     if (!record.phone.trim()) newError.phone = "Phone is required";
-    if (!record.password.trim()) newError.password = "Password is required";
-    else if (record.password.length < 6) newError.password = "Password must be at least 6 characters";
     if (!record.email.trim()) newError.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(record.email)) newError.email = "Email format is invalid";
+
+    if (!record.password.trim()) {
+      newError.password = "Password is required";
+    } else {
+      const strength = checkPasswordStrength(record.password);
+      if (strength < 4) {
+        newError.password = "Password must be 8+ chars, with uppercase, number & special symbol";
+      }
+    }
+
     return newError;
   };
 
@@ -49,12 +82,11 @@ export default function Register() {
       return;
     }
 
-    // Send OTP to email or phone
     axios.post('http://localhost:9000/api/user/request-otp', record)
       .then((res) => {
         toast.success("OTP sent to your email/phone.");
         setOtpSent(true);
-        setTempUserId(res.data.userId); // could be email or some ID returned
+        setTempUserId(res.data.userId);
       })
       .catch((err) => {
         toast.error(err.response?.data?.message || "Failed to send OTP.");
@@ -73,7 +105,6 @@ export default function Register() {
     });
   };
 
-  // Animation
   useEffect(() => {
     const lines = document.querySelectorAll(".circuit-line");
     gsap.fromTo(
@@ -119,12 +150,44 @@ export default function Register() {
           <Typography variant="h5" mb={2}>Register</Typography>
           {!otpSent ? (
             <form onSubmit={handleSubmit}>
-              <TextField fullWidth margin="normal" label="Name" name="name" onChange={handleChange} error={!!error.name} helperText={error.name} />
-              <TextField fullWidth margin="normal" label="Place" name="place" onChange={handleChange} error={!!error.place} helperText={error.place} />
-              <TextField fullWidth margin="normal" label="Address" name="address" onChange={handleChange} error={!!error.address} helperText={error.address} />
-              <TextField fullWidth margin="normal" label="Phone" name="phone" type="number" onChange={handleChange} error={!!error.phone} helperText={error.phone} />
-              <TextField fullWidth margin="normal" label="Email" name="email" type="email" onChange={handleChange} error={!!error.email} helperText={error.email} />
-              <TextField fullWidth margin="normal" label="Password" name="password" type="password" onChange={handleChange} error={!!error.password} helperText={error.password} />
+              <TextField fullWidth margin="normal" label="Name" name="name" onChange={handleChange} error={!!error.name} helperText={error.name} autoComplete="off" autoFocus/>
+              <TextField fullWidth margin="normal" label="Place" name="place" onChange={handleChange} error={!!error.place} helperText={error.place} autoComplete="off"/>
+              <TextField fullWidth margin="normal" label="Address" name="address" onChange={handleChange} error={!!error.address} helperText={error.address} autoComplete="off"/>
+              <TextField fullWidth margin="normal" label="Phone" name="phone" type="number" onChange={handleChange} error={!!error.phone} helperText={error.phone} autoComplete="off" />
+              <TextField fullWidth margin="normal" label="Email" name="email" type="email" onChange={handleChange} error={!!error.email} helperText={error.email} autoComplete="off"/>
+
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Password"
+                name="password"
+                type="password"
+                autoComplete="off"
+                onChange={handleChange}
+                error={!!error.password}
+                helperText={error.password}
+              />
+
+              {/* Password strength bar */}
+              <Box sx={{ height: 8, width: '100%', backgroundColor: '#eee', borderRadius: 2, overflow: 'hidden', mt: 1 }}>
+                <Box
+                  sx={{
+                    height: '100%',
+                    width: `${(passwordStrength / 4) * 100}%`,
+                    backgroundColor: getStrengthColor(passwordStrength),
+                    transition: 'width 0.3s ease'
+                  }}
+                />
+              </Box>
+
+              <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5, display: 'block' }}>
+                {passwordStrength === 0 && ''}
+                {passwordStrength === 1 && 'Weak password'}
+                {passwordStrength === 2 && 'Moderate password'}
+                {passwordStrength === 3 && 'Good password'}
+                {passwordStrength === 4 && 'Strong password ✅'}
+              </Typography>
+
               <Button variant="contained" fullWidth type="submit" sx={{ mt: 2 }}>
                 Register
               </Button>

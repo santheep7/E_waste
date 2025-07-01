@@ -7,6 +7,8 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './usernavbar';
 import './request.css';
+// import { Recycle, Facebook, Twitter, Instagram, Mail, ChevronRight, ChevronLeft } from 'lucide-react';
+// import Footer from './Footer';
 
 export default function Request() {
   const [formData, setFormData] = useState({
@@ -69,7 +71,7 @@ export default function Request() {
             image: null
           });
 
-          setTimeout(() => navigate('/'), 2000); // slight delay for user to see toast
+          setTimeout(() => navigate('/homepage'), 2000); // slight delay for user to see toast
         } catch (err) {
           const errorMsg = err.response?.data?.message || err.message || 'Submission failed';
           toast.error(errorMsg);
@@ -85,7 +87,7 @@ export default function Request() {
     <>
       <Navbar />
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="container py-5">
+      <div className="container py-5" style={{marginTop:"50px"}}>
         <div className="card mx-auto" style={{ maxWidth: '600px' }}>
           <div className="card-header bg-success text-white">
             <h4 className="mb-0">E-Waste Pickup Request</h4>
@@ -184,6 +186,7 @@ export default function Request() {
             </form>
           </div>
         </div>
+        {/* <Footer/> */}
       </div>
     </>
   );

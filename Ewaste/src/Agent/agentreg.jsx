@@ -75,7 +75,7 @@ export default function AgentRegister() {
   return (
     <>
       <AgentNavbar />
-      <Grid container justifyContent="center" sx={{ mt: 4 }}>
+      <Grid container justifyContent="center" sx={{ mt: 12 }}>
         <ToastContainer position="top-center" />
         <Grid item xs={11} sm={8} md={6}>
           <Paper elevation={3} sx={{ p: 4 }}>

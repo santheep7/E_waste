@@ -1,5 +1,5 @@
 const Request = require('../model/Requestmodel'); 
-
+const Agent = require('../model/Agentmodel')
 const createRequest = async (req, res) => {
   try {
     console.log("req.user:", req.user); 
@@ -100,10 +100,42 @@ const cancelRequest = async (req, res) => {
 
 
 // For agents to view only approved requests
+
+
 const getApprovedRequests = async (req, res) => {
   try {
-    const approvedRequests = await Request.find({ status: 'Approved' }).populate('user', 'name email');
-    res.status(200).json(approvedRequests);
+    const agentId = req.headers['x-agent-id'];
+
+    if (!agentId) {
+      return res.status(400).json({ message: 'Agent ID is required in headers' });
+    }
+
+    // Fetch agent details
+    const agent = await Agent.findById(agentId);
+
+    if (!agent) {
+      return res.status(404).json({ message: 'Agent not found' });
+    }
+
+    const agentPlace = agent.place; // get the agent's locality
+
+    if (!agentPlace) {
+      return res.status(400).json({ message: 'Agent does not have a place specified' });
+    }
+
+    // Find approved requests where the user's place matches agent's
+    const approvedRequests = await Request.find({ status: 'Approved' })
+      .populate({
+        path: 'user',
+        select: 'name email phone place address',
+        match: { place: agentPlace }
+      })
+      .sort({ createdAt: -1 });
+
+    // Filter out nulls (no place match)
+    const filtered = approvedRequests.filter(req => req.user !== null);
+
+    res.status(200).json(filtered);
   } catch (error) {
     console.error('Error fetching approved requests:', error.message);
     res.status(500).json({ message: 'Failed to fetch approved requests' });
